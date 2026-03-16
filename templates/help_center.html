@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>帮助中心 - 建筑修缮审批系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <div class="w-100 d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <ul class="navbar-nav d-flex align-items-center">
+                        <li class="nav-item">
+                            <span class="nav-link" id="currentDate"></span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="mx-auto">
+                    <a class="navbar-brand text-center" href="{{ url_for('dashboard') }}">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <i class="fas fa-building me-2"></i>
+                            <span class="fs-4 fw-bold">建筑修缮审批系统</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="flex-grow-1 text-end">
+                    <ul class="navbar-nav d-flex align-items-center justify-content-end">
+                        <li class="nav-item me-3">
+                            <span class="nav-link">欢迎，{{ current_user.username }} ({{ current_user.role }})</span>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-secondary" href="{{ url_for('logout') }}">
+                                <i class="fas fa-sign-out-alt me-1"></i> 退出登录
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('zh-CN', options);
+        });
+    </script>
+    
+    <div class="wrapper">
+        <aside class="sidebar">
+            <ul>
+                <li>
+                    <a href="{{ url_for('dashboard') }}">
+                        <i class="fas fa-home"></i>
+                        <span>仪表盘</span>
+                    </a>
+                </li>
+                {% if current_user.role == '普通用户' %}
+                <li>
+                    <a href="{{ url_for('create_project') }}">
+                        <i class="fas fa-plus"></i>
+                        <span>创建项目</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('user_history') }}">
+                        <i class="fas fa-history"></i>
+                        <span>历史记录</span>
+                    </a>
+                </li>
+                {% elif current_user.role == '审核人员' %}
+                <li>
+                    <a href="{{ url_for('pending_review') }}">
+                        <i class="fas fa-tasks"></i>
+                        <span>待审核项目</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('review_history') }}">
+                        <i class="fas fa-history"></i>
+                        <span>审核历史</span>
+                    </a>
+                </li>
+                {% elif current_user.role == '领导' %}
+                <li>
+                    <a href="{{ url_for('pending_approval') }}">
+                        <i class="fas fa-tasks"></i>
+                        <span>待审批项目</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('approval_history') }}">
+                        <i class="fas fa-history"></i>
+                        <span>审批历史</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>统计报表</span>
+                    </a>
+                </li>
+                {% endif %}
+                <li>
+                    <a href="{{ url_for('user_settings') }}">
+                        <i class="fas fa-user-cog"></i>
+                        <span>个人设置</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('help_center') }}" class="active">
+                        <i class="fas fa-question-circle"></i>
+                        <span>帮助中心</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+        
+        <main class="main-content">
+            <div class="form-container fade-in">
+                <h2>帮助中心</h2>
+                
+                <div class="help-section">
+                    <h3>系统简介</h3>
+                    <p>建筑修缮审批系统是一个用于管理建筑修缮项目的工作流平台，支持项目的申请、审核和审批流程。</p>
+                    <p>系统包含三种用户角色：</p>
+                    <ul>
+                        <li><strong>普通用户</strong>：可以提交修缮项目申请</li>
+                        <li><strong>审核人员</strong>：可以审核普通用户提交的项目</li>
+                        <li><strong>领导</strong>：可以审批审核通过的项目</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3>操作指南</h3>
+                    <h4>普通用户操作</h4>
+                    <ol>
+                        <li>登录系统后，点击左侧导航栏的"创建项目"按钮</li>
+                        <li>填写项目名称、位置、预算和修缮内容</li>
+                        <li>点击"提交申请"按钮，等待审核</li>
+                        <li>在"仪表盘"中查看项目状态和处理进度</li>
+                    </ol>
+                    
+                    <h4>审核人员操作</h4>
+                    <ol>
+                        <li>登录系统后，在"待审核项目"中查看需要审核的项目</li>
+                        <li>点击"进行审核"按钮，查看项目详情</li>
+                        <li>根据项目情况选择"通过"或"拒绝"，并填写审核意见</li>
+                        <li>在"审核历史"中查看已审核的项目</li>
+                    </ol>
+                    
+                    <h4>领导操作</h4>
+                    <ol>
+                        <li>登录系统后，在"待审批项目"中查看需要审批的项目</li>
+                        <li>点击"进行审批"按钮，查看项目详情和审核意见</li>
+                        <li>根据项目情况选择"通过"或"拒绝"，并填写审批意见</li>
+                        <li>在"审批历史"中查看已审批的项目</li>
+                    </ol>
+                </div>
+                
+                <div class="help-section">
+                    <h3>项目状态说明</h3>
+                    <ul>
+                        <li><strong>待审核</strong>：项目已提交，等待审核人员审核</li>
+                        <li><strong>审核中</strong>：审核人员正在审核项目</li>
+                        <li><strong>已审核</strong>：项目已通过审核，等待领导审批</li>
+                        <li><strong>待审批</strong>：项目已通过审核，等待领导审批</li>
+                        <li><strong>已审批</strong>：项目已通过审批，可以开始实施</li>
+                        <li><strong>已拒绝</strong>：项目未通过审核或审批</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3>常见问题</h3>
+                    <h4>1. 如何修改已提交的项目？</h4>
+                    <p>目前系统不支持修改已提交的项目，如有需要请联系管理员。</p>
+                    
+                    <h4>2. 项目审核需要多长时间？</h4>
+                    <p>审核时间取决于审核人员的工作安排，一般情况下会在1-2个工作日内完成。</p>
+                    
+                    <h4>3. 项目审批需要多长时间？</h4>
+                    <p>审批时间取决于领导的工作安排，一般情况下会在1-3个工作日内完成。</p>
+                    
+                    <h4>4. 如何查看项目的处理进度？</h4>
+                    <p>登录系统后，在"仪表盘"中可以查看项目的当前状态和处理进度。</p>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <footer class="mt-auto py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">© 2026 建筑修缮审批系统</span>
+        </div>
+    </footer>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
