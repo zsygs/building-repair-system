@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户仪表盘 - 建筑修缮审批系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <div class="w-100 d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <ul class="navbar-nav d-flex align-items-center">
+                        <li class="nav-item">
+                            <span class="nav-link" id="currentDate"></span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="mx-auto">
+                    <a class="navbar-brand text-center" href="{{ url_for('dashboard') }}">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <i class="fas fa-building me-2"></i>
+                            <span class="fs-4 fw-bold">建筑修缮审批系统</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="flex-grow-1 text-end">
+                    <ul class="navbar-nav d-flex align-items-center justify-content-end">
+                        <li class="nav-item me-3">
+                            <span class="nav-link">欢迎，{{ current_user.username }} ({{ current_user.role }})</span>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-secondary" href="{{ url_for('logout') }}">
+                                <i class="fas fa-sign-out-alt me-1"></i> 退出登录
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('zh-CN', options);
+            
+            // 处理日期输入框的占位符
+            const dateInputs = document.querySelectorAll('input[type="date"]');
+            dateInputs.forEach(input => {
+                // 初始状态隐藏占位符
+                if (!input.value) {
+                    input.style.color = 'transparent';
+                }
+                
+                // 聚焦时仍然隐藏占位符，直到用户选择日期
+                input.addEventListener('focus', function() {
+                    if (!this.value) {
+                        this.style.color = 'transparent';
+                    } else {
+                        this.style.color = '#495057';
+                    }
+                });
+                
+                // 失焦时如果没有值则隐藏颜色
+                input.addEventListener('blur', function() {
+                    if (!this.value) {
+                        this.style.color = 'transparent';
+                    } else {
+                        this.style.color = '#495057';
+                    }
+                });
+                
+                // 输入时显示颜色
+                input.addEventListener('input', function() {
+                    if (this.value) {
+                        this.style.color = '#495057';
+                    } else {
+                        this.style.color = 'transparent';
+                    }
+                });
+                
+                // 点击时隐藏占位符
+                input.addEventListener('click', function() {
+                    if (!this.value) {
+                        this.style.color = 'transparent';
+                    }
+                });
+            });
+        });
+    </script>
+    
+    <div class="wrapper">
+        <aside class="sidebar">
+            <ul>
+                <li>
+                    <a href="{{ url_for('dashboard') }}" class="active">
+                        <i class="fas fa-home"></i>
+                        <span>仪表盘</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('create_project') }}">
+                        <i class="fas fa-plus"></i>
+                        <span>创建项目</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('user_history') }}">
+                        <i class="fas fa-history"></i>
+                        <span>历史记录</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('user_settings') }}">
+                        <i class="fas fa-user-cog"></i>
+                        <span>个人设置</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('help_center') }}">
+                        <i class="fas fa-question-circle"></i>
+                        <span>帮助中心</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+        
+        <main class="main-content">
+            <h2>我的项目</h2>
+            <div class="mb-4">
+                <a href="{{ url_for('create_project') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> 创建新项目
+                </a>
+            </div>
+            <div class="mb-4 search-form">
+                <form method="GET" action="{{ url_for('dashboard') }}" class="row g-3">
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" name="search" placeholder="搜索项目名称或位置" value="{{ request.args.get('search', '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" name="user_search" placeholder="搜索申请人或审核人" value="{{ request.args.get('user_search', '') }}">
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <input type="date" class="form-control" name="start_date" placeholder="起始日期" value="{{ request.args.get('start_date', '') }}">
+                            <span class="input-group-text">至</span>
+                            <input type="date" class="form-control" name="end_date" placeholder="结束日期"  value="{{ request.args.get('end_date', '') }}">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i> 搜索
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="alert alert-success" role="alert">
+                        {% for message in messages %}
+                            {{ message }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            {% if project_data %}
+                <div class="row">
+                    {% for data in project_data %}
+                        <div class="col-md-3 mb-4">
+                            <div class="project-card card fade-in">
+                                <div class="card-header">
+                                    <h5>{{ data.project.name }}</h5>
+                                    <div class="mt-1">
+                                        {% if data.project.status == '待审核' %}
+                                            <span class="badge badge-warning">待审核</span>
+                                        {% elif data.project.status == '审核中' %}
+                                            <span class="badge badge-info">审核中</span>
+                                        {% elif data.project.status == '已审核' %}
+                                            <span class="badge badge-primary">已审核</span>
+                                        {% elif data.project.status == '待审批' %}
+                                            <span class="badge badge-primary">待审批</span>
+                                        {% elif data.project.status == '已审批' %}
+                                            <span class="badge badge-success">已审批</span>
+                                        {% elif data.project.status == '已拒绝' %}
+                                            <span class="badge badge-danger">已拒绝</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-2 text-center">
+                                        <strong>位置：</strong>{{ data.project.location }}
+                                    </div>
+                                    <div class="mb-2 text-center">
+                                        <strong>预算：</strong>¥{{ data.project.budget }}
+                                    </div>
+                                    <div class="mb-2 user-info justify-content-center">
+                                        <i class="fas fa-user"></i>
+                                        <strong>申请人：</strong>{{ data.submitter.username }}
+                                    </div>
+                                    {% if data.reviewer %}
+                                        <div class="mb-2 user-info justify-content-center">
+                                            <i class="fas fa-user-check"></i>
+                                            <strong>审核人：</strong>{{ data.reviewer.username }}
+                                        </div>
+                                    {% endif %}
+                                    {% if data.approver %}
+                                        <div class="mb-2 user-info justify-content-center">
+                                            <i class="fas fa-user-tie"></i>
+                                            <strong>审批人：</strong>{{ data.approver.username }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="mb-2 text-center">
+                                        <strong>提交时间：</strong>{{ data.project.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                    </div>
+                                    {% if data.review %}
+                                        <div class="mb-2 text-center">
+                                            <strong>审核时间：</strong>{{ data.review.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                        </div>
+                                    {% endif %}
+                                    {% if data.approval %}
+                                        <div class="mb-2 text-center">
+                                            <strong>审批时间：</strong>{{ data.approval.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="mt-3 text-center">
+                                        <a href="{{ url_for('project_detail', project_id=data.project.id) }}" class="btn btn-info">
+                                            <i class="fas fa-eye"></i> 查看详情
+                                        </a>
+                                        <a href="{{ url_for('delete_project', project_id=data.project.id) }}" class="btn btn-danger ms-2">
+                                            <i class="fas fa-trash"></i> 删除
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    暂无项目，点击上方按钮创建新项目
+                </div>
+            {% endif %}
+        </main>
+    </div>
+    
+    <footer class="mt-auto py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">© 2026 建筑修缮审批系统</span>
+        </div>
+    </footer>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
